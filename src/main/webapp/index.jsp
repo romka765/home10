@@ -63,7 +63,7 @@
         </c:if>
         <c:if test="${checkWinner == true}">
             <br><hr>
-            <h2 align="center">Игра окончена! Победил ${name}</h2>
+            <h2 align="center">Игра окончена! Победил ${playerName}}</h2>
         </c:if>
         <c:if test="${numberOfPossibleMoves == 0}">
             <h2 align="center">Игра окончена вничью.</h2>
