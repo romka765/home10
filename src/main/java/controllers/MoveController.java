@@ -16,18 +16,20 @@ public class MoveController {
     private int arrayOfTurns[][];
     private int size;
     private boolean winGame = false;
+    private int numberOfPossibleMoves;
 
 
 //cookies, session
 
 
     //    начальные параметры игры
-    private int[][] createArrayOfTurns(int length) {
-        arrayOfTurns = new int[length][length];
+    private int[][] createArrayOfTurns(int size) {
+        //создает массив [i][](не заполняет второе значение
+        arrayOfTurns = new int[size][size];
 // не обращать внимание, пытался избавиться от глобальных переменных
         //       ArrayList<Integer> arrayOfTurns = new ArrayList<Integer>(length);
         for (int i = 0; i < arrayOfTurns.length; i++) {
-            for (int j = 0; j < arrayOfTurns.length; j++) {
+            for (int j = 0; j < arrayOfTurns[i].length; j++) {
                 arrayOfTurns[i][j] = 0;
             }
         }
@@ -35,23 +37,27 @@ public class MoveController {
     }
 
     // не обращать внимание, пытался избавиться от глобальных переменных
-    private int[][] turnList() {
-        return arrayOfTurns;
-    }
+//    private int[][] turnList() {
+//        return arrayOfTurns;
+//    }
 
     private int createNumberOfPossibleMoves(int sizeOfField) {
-        return sizeOfField * sizeOfField;
+        numberOfPossibleMoves= sizeOfField * sizeOfField;
+        return numberOfPossibleMoves;
     }
 
     @RequestMapping("/start")          // Integer для того,чтобы сделать проверку. не придумал как по другому
     private String startGameParameters(@RequestParam("sizeOfField") Integer sizeOfField, Model model) {
+        int possibleMoves = 0;
         if (sizeOfField != null) {
-            model.addAttribute("massOfTurns", createArrayOfTurns(createNumberOfPossibleMoves(sizeOfField)));
-            model.addAttribute("numberOfPossibleMoves", createNumberOfPossibleMoves(sizeOfField));
             size = sizeOfField;
-
+            possibleMoves = createNumberOfPossibleMoves(size);
+            int arrayOfTurns[][] = createArrayOfTurns(size);
         }
-        return "index.jsp";
+        System.out.println(arrayOfTurns);
+        model.addAttribute("arrayOfTurns", arrayOfTurns);
+        model.addAttribute("numberOfPossibleMoves", possibleMoves);
+        return "/index.jsp";
     }
 
     // не обращать внимание, пытался избавиться от глобальных переменных
@@ -71,22 +77,29 @@ public class MoveController {
 //    }
     @RequestMapping("/move")
     private String move(HttpServletRequest request, Model model) {
-        int valHorizon = parseInt("horizon");
-        int valVertical = parseInt("vertical");
+        int valHorizon = parseInt(request.getParameter("val1"));
+        int valVertical = parseInt(request.getParameter("val2"));
         arrayOfTurns[valHorizon][valVertical] = 1;
-        int compHorizon;
-        int compVertical;
-        do {
-            compHorizon = randomNumber(size);
-            compVertical = randomNumber(size);
-            if (arrayOfTurns[compHorizon][compVertical] == 0){
-                arrayOfTurns[compHorizon][compVertical] = 2;
+        if (!checkWinner(arrayOfTurns, valHorizon, valVertical)) {
+            getWinner("Игрок", arrayOfTurns, valHorizon, valVertical, model);
+            numberOfPossibleMoves--;
+        }
+            if (!winGame) {
+                int compHorizon;
+                int compVertical;
+                do {
+                    compHorizon = randomNumber(size);
+                    compVertical = randomNumber(size);
+                    if (arrayOfTurns[compHorizon][compVertical] == 0) {
+                        arrayOfTurns[compHorizon][compVertical] = 2;
+                    }
+                } while (arrayOfTurns[compHorizon][compVertical] != 0);
+                numberOfPossibleMoves--;
+                getWinner("Компьютер", arrayOfTurns, valHorizon, valVertical, model);
             }
-        } while (arrayOfTurns[compHorizon][compVertical] != 0);
-
-        model.addAttribute("arrayOfTurns", arrayOfTurns);
-
-        return "/index.jsp";
+            model.addAttribute("arrayOfTurns", arrayOfTurns);
+            model.addAttribute("numberOfPossibleMoves", numberOfPossibleMoves);
+            return "/index.jsp";
     }
     
     private int parseInt(String request) {
@@ -103,12 +116,12 @@ public class MoveController {
         }
     }
 
-    private boolean checkWinner(int arrayOfTurns[][], int valHorizont, int valVertical) {
+    private boolean checkWinner(int arrayOfTurns[][], int valHorizon, int valVertical) {
         //проверка горизонтальной линии
         if (!winGame) {
             for (int i = 0; i < arrayOfTurns.length - 1; i++) {
-                if (arrayOfTurns[valHorizont][i] > 0) {
-                    if (arrayOfTurns[valHorizont][i + 1] != arrayOfTurns[valHorizont][i]) {
+                if (arrayOfTurns[valHorizon][i] > 0) {
+                    if (arrayOfTurns[valHorizon][i + 1] != arrayOfTurns[valHorizon][i]) {
                         winGame = false;
                         break;
                     } else winGame = true;
@@ -128,7 +141,7 @@ public class MoveController {
         }
         // проверка главной диагонали (если относится)
         if (!winGame) {
-            if (valHorizont == valVertical) {
+            if (valHorizon == valVertical) {
                 for (int i = 0; i < arrayOfTurns.length - 1; i++) {
                     if (arrayOfTurns[i][i] > 0) {
                         if (arrayOfTurns[i][i] != arrayOfTurns[i + 1][i + 1]) {
