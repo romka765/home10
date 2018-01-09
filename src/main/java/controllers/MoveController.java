@@ -48,15 +48,15 @@ public class MoveController {
 
     @RequestMapping("/start")          // Integer для того,чтобы сделать проверку. не придумал как по другому
     private String startGameParameters(@RequestParam("sizeOfField") Integer sizeOfField, Model model) {
-        int possibleMoves = 0;
+
         if (sizeOfField != null) {
             size = sizeOfField;
-            possibleMoves = createNumberOfPossibleMoves(size);
-            int arrayOfTurns[][] = createArrayOfTurns(size);
+            createNumberOfPossibleMoves(size);
+            createArrayOfTurns(size);
         }
         System.out.println(arrayOfTurns);
         model.addAttribute("arrayOfTurns", arrayOfTurns);
-        model.addAttribute("numberOfPossibleMoves", possibleMoves);
+        model.addAttribute("numberOfPossibleMoves", numberOfPossibleMoves);
         return "/index.jsp";
     }
 
