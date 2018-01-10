@@ -94,7 +94,7 @@ public class MoveController {
                     if (arrayOfTurns[compHorizon][compVertical] == 0) {
                         arrayOfTurns[compHorizon][compVertical] = 2;
                     }
-                } while (arrayOfTurns[compHorizon][compVertical] == 0 && arrayOfTurns[compHorizon][compVertical] == 1);
+                } while (arrayOfTurns[compHorizon][compVertical] == 0 || arrayOfTurns[compHorizon][compVertical] == 1);
                 numberOfPossibleMoves--;
                 getWinner("Компьютер", arrayOfTurns, valHorizon, valVertical, model);
             }
