@@ -19,7 +19,7 @@ public class MoveController {
     private int numberOfPossibleMoves;
 
 
-//cookies, session
+//todo cookies, session
 
 
     //    начальные параметры игры
