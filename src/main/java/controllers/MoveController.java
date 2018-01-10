@@ -24,7 +24,7 @@ public class MoveController {
 
     //    начальные параметры игры
     private int[][] createArrayOfTurns(int size) {
-        //создает массив [i][](не заполняет второе значение
+        arrayOfTurns = null;
         arrayOfTurns = new int[size][size];
 // не обращать внимание, пытался избавиться от глобальных переменных
         //       ArrayList<Integer> arrayOfTurns = new ArrayList<Integer>(length);
@@ -48,15 +48,16 @@ public class MoveController {
 
     @RequestMapping("/start")          // Integer для того,чтобы сделать проверку. не придумал как по другому
     private String startGameParameters(@RequestParam("sizeOfField") Integer sizeOfField, Model model) {
-
+        winGame= false;
         if (sizeOfField != null) {
             size = sizeOfField;
             createNumberOfPossibleMoves(size);
             createArrayOfTurns(size);
         }
-        System.out.println(arrayOfTurns);
+        System.out.println(arrayOfTurns.toString());
         model.addAttribute("arrayOfTurns", arrayOfTurns);
         model.addAttribute("numberOfPossibleMoves", numberOfPossibleMoves);
+        model.addAttribute("checkWinner", winGame);
         return "/index.jsp";
     }
 
@@ -77,8 +78,8 @@ public class MoveController {
 //    }
     @RequestMapping("/move")
     private String move(HttpServletRequest request, Model model) {
-        int valHorizon = parseInt(request.getParameter("val1"));
-        int valVertical = parseInt(request.getParameter("val2"));
+        int valHorizon = parseInt(request.getParameter("idMass1"));
+        int valVertical = parseInt(request.getParameter("idMass2"));
         arrayOfTurns[valHorizon][valVertical] = 1;
         if (!checkWinner(arrayOfTurns, valHorizon, valVertical)) {
             getWinner("Игрок", arrayOfTurns, valHorizon, valVertical, model);
@@ -88,17 +89,18 @@ public class MoveController {
                 int compHorizon;
                 int compVertical;
                 do {
-                    compHorizon = randomNumber(size);
-                    compVertical = randomNumber(size);
+                    compHorizon = randomNumber(size-1);
+                    compVertical = randomNumber(size-1);
                     if (arrayOfTurns[compHorizon][compVertical] == 0) {
                         arrayOfTurns[compHorizon][compVertical] = 2;
                     }
-                } while (arrayOfTurns[compHorizon][compVertical] != 0);
+                } while (arrayOfTurns[compHorizon][compVertical] == 0 && arrayOfTurns[compHorizon][compVertical] == 1);
                 numberOfPossibleMoves--;
                 getWinner("Компьютер", arrayOfTurns, valHorizon, valVertical, model);
             }
             model.addAttribute("arrayOfTurns", arrayOfTurns);
             model.addAttribute("numberOfPossibleMoves", numberOfPossibleMoves);
+            model.addAttribute("checkWinner", winGame);
             return "/index.jsp";
     }
     
@@ -110,8 +112,9 @@ public class MoveController {
         return random.nextInt(size-1);
     }
 
-    private void getWinner(String playerName, int arrayOfTurns[][], int valHorizont, int valVertical, Model model){
-        if (checkWinner(arrayOfTurns,valHorizont,valVertical)){
+    private void getWinner(String playerName, int arrayOfTurns[][], int valHorizon, int valVertical, Model model){
+        if (checkWinner(arrayOfTurns,valHorizon,valVertical)){
+            model.addAttribute("sizeOfField", null);
             model.addAttribute("playerName", playerName);
         }
     }
@@ -154,7 +157,7 @@ public class MoveController {
         }
         //проверка побочной диагонали
         if (!winGame) {
-            for (int i = arrayOfTurns.length; i > 0; i--) {
+            for (int i = arrayOfTurns.length-1; i > 0; i--) {
                 for (int j = 0; j < arrayOfTurns.length - 1; j++) {
                     if (arrayOfTurns[i][j] > 0) {
                         if (arrayOfTurns[i][j] != arrayOfTurns[i - 1][j + 1]) {
@@ -169,38 +172,4 @@ public class MoveController {
             return true;
         } return false;
     }
-
-//                    }
-//                    if(arrayOfTurns[i][vertical]==1) {
-//                        playerPointsVertical++;
-//                    }
-//                    if(arrayOfTurns[i][vertical]==2){
-//                        computerPointsVertical++;
-//                    }
-//                }
-//                if(playerPointsHorizont==size || playerPointsVertical == size){
-//                    winGame= true;
-//                    return "Игрок";
-//                }
-//                if(computerPointsHorizont==size || computerPointsVertical == size){
-//                    return "Компьютер";
-//                }
-//        }
-//        if(!winGame){
-//            int  playerPoints = 0;
-//            int computerPoints = 0;
-//            for(int i = 0; i<size; i++){
-//                if (arrayOfTurns[i][i] == 1){
-//                    playerPoints++;
-//                }
-//                if(arrayOfTurns[i][i]=2)
-//            }
-//        }
-//    }
-//
-//    private boolean checkLine(int arrayOfTurns[][], int ){
-//
-//    }
-
-
 }
